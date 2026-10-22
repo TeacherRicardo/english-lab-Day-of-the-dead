@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Lab - Día de Muertos vs. Halloween</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cempasuchil: '#FF8C00',
+                        cempasuchilDark: '#CC7000',
+                        purpleLab: '#6B21A8',
+                        purpleDark: '#4C1D95',
+                        halloweenOrange: '#FF5722',
+                        calaveraPink: '#EC4899',
+                        labDark: '#0F172A',
+                        labCard: '#1E293B',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styles & Smooth Transitions */
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .glow-cempasuchil {
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.35);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(107, 33, 168, 0.4);
+        }
+
+        .word-chip {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .word-chip:active {
+            transform: scale(0.95);
+        }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Animated Progress Bar */
+        .progress-fill {
+            transition: width 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden bg-slate-950 text-slate-100">
+
+    <!-- TOP HEADER / NAV BAR -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800 px-4 py-3 shadow-lg">
+        <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cempasuchil to-purpleLab flex items-center justify-center text-white text-xl shadow-lg">
+                    <i class="fa-solid fa-flask"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-purple-400">
+                        ENGLISH LAB 2º
+                    </h1>
+                    <p class="text-xs text-slate-400">Día de Muertos vs. Halloween</p>
+                </div>
+            </div>
+
+            <!-- Stats & Gamification -->
+            <div class="flex items-center gap-3 bg-slate-900/80 p-1.5 px-3 rounded-full border border-slate-800">
+                <!-- Level Badge -->
+                <div class="flex items-center gap-1.5 text-xs font-semibold bg-purple-950 text-purple-300 px-2.5 py-1 rounded-full border border-purple-800">
+                    <i class="fa-solid fa-award text-amber-400"></i>
+                    <span id="level-txt">Nivel 1</span>
+                </div>
+
+                <!-- XP Score -->
+                <div class="flex items-center gap-1 text-sm font-bold text-amber-400 px-1">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span id="xp-counter">0</span> <span class="text-xs text-slate-400">XP</span>
+                </div>
+
+                <!-- Cheat Sheet Button -->
+                <button onclick="openCheatSheet()" class="ml-1 bg-cempasuchil hover:bg-cempasuchilDark text-slate-950 font-bold px-3 py-1 rounded-full text-xs transition flex items-center gap-1 shadow-md">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span class="hidden sm:inline">Guía Rápida</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="max-w-5xl mx-auto mt-2">
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="overall-progress" class="bg-gradient-to-r from-cempasuchil via-orange-500 to-purple-500 h-full w-0 progress-fill"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl w-full mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center">
+
+        <!-- MODULE SELECTOR TABS -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+            <button onclick="switchModule(1)" id="tab-1" class="module-tab active bg-slate-800 border-2 border-cempasuchil text-white py-3 px-2 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition hover:bg-slate-700">
+                <i class="fa-solid fa-puzzle-piece text-cempasuchil text-base sm:text-lg"></i>
+                <span class="text-center">1. Sentence Builder</span>
+            </button>
+            <button onclick="switchModule(2)" id="tab-2" class="module-tab bg-slate-900 border-2 border-transparent text-slate-400 py-3 px-2 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition hover:bg-slate-800">
+                <i class="fa-solid fa-bolt text-purple-400 text-base sm:text-lg"></i>
+                <span class="text-center">2. Quick Quiz</span>
+            </button>
+            <button onclick="switchModule(3)" id="tab-3" class="module-tab bg-slate-900 border-2 border-transparent text-slate-400 py-3 px-2 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition hover:bg-slate-800">
+                <i class="fa-solid fa-masks-theater text-pink-400 text-base sm:text-lg"></i>
+                <span class="text-center">3. Match & Compare</span>
+            </button>
+        </div>
+
+        <!-- SECTION 1: SENTENCE BUILDER -->
+        <section id="module-1" class="module-content flex flex-col gap-4">
+            <div class="glass-panel p-5 sm:p-7 rounded-2xl border border-slate-800 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cempasuchil bg-orange-950/60 border border-orange-800 px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-cubes"></i> Ordena la oración
+                    </span>
+                    <span class="text-xs text-slate-400 font-mono" id="sb-count">1/5</span>
+                </div>
+
+                <!-- Sentence Prompt / Translation hint -->
+                <div class="mb-6 bg-slate-900/90 p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400 mb-1">Traduce / Ordena para formar:</p>
+                    <p id="sb-hint" class="text-base sm:text-lg font-semibold text-slate-200">"El Día de Muertos es más antiguo que Halloween."</p>
+                </div>
+
+                <!-- Answer Slot Area -->
+                <div class="mb-6">
+                    <p class="text-xs text-slate-400 mb-2">Tu respuesta:</p>
+                    <div id="sb-answer-zone" class="min-h-[64px] bg-slate-950/80 rounded-xl p-3 border-2 border-dashed border-slate-700 flex flex-wrap gap-2 items-center">
+                        <span class="text-slate-600 text-sm italic pointer-events-none" id="sb-placeholder">Toca las palabras de abajo en orden...</span>
+                    </div>
+                </div>
+
+                <!-- Word Bank Area -->
+                <div class="mb-6">
+                    <p class="text-xs text-slate-400 mb-2">Banco de palabras:</p>
+                    <div id="sb-word-bank" class="flex flex-wrap gap-2 min-h-[50px]">
+                        <!-- Word chips will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Controls & Feedback -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
+                    <button onclick="resetCurrentSentence()" class="w-full sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reiniciar
+                    </button>
+                    <button onclick="checkSentence()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cempasuchil to-orange-600 hover:from-orange-500 hover:to-orange-700 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check-circle"></i> Comprobar Respuesta
+                    </button>
+                </div>
+
+                <!-- Feedback Banner -->
+                <div id="sb-feedback" class="hidden mt-4 p-4 rounded-xl text-sm font-semibold flex items-center gap-3"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: QUICK QUIZ -->
+        <section id="module-2" class="module-content hidden flex-col gap-4">
+            <div class="glass-panel p-5 sm:p-7 rounded-2xl border border-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-950/60 border border-purple-800 px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-bolt"></i> Duelo de Reglas Gramaticales
+                    </span>
+                    <span class="text-xs text-slate-400 font-mono" id="qq-count">1/5</span>
+                </div>
+
+                <!-- Question -->
+                <div class="mb-6 bg-slate-900/90 p-4 sm:p-5 rounded-xl border border-slate-800">
+                    <h3 id="qq-question" class="text-base sm:text-xl font-bold text-slate-100">
+                        Elige la forma correcta: "Pan de muerto is _______ (delicious) than candy corn."
+                    </h3>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="qq-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <!-- Option buttons populated by JS -->
+                </div>
+
+                <!-- Explanation / Rule Tip Box -->
+                <div id="qq-explanation" class="hidden p-4 rounded-xl bg-purple-950/50 border border-purple-800/60 text-sm text-purple-200">
+                    <!-- Rule explanation shown after answer -->
+                </div>
+
+                <!-- Next Question Button -->
+                <div class="flex justify-end mt-4">
+                    <button id="qq-next-btn" onclick="nextQuizQuestion()" class="hidden px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-sm transition shadow-lg flex items-center gap-2">
+                        <span>Siguiente Pregunta</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MATCH & COMPARE -->
+        <section id="module-3" class="module-content hidden flex-col gap-4">
+            <div class="glass-panel p-5 sm:p-7 rounded-2xl border border-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400 bg-pink-950/60 border border-pink-800 px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-masks-theater"></i> Culture Match & Compare
+                    </span>
+                    <span class="text-xs text-slate-400 font-mono" id="mc-count">1/5</span>
+                </div>
+
+                <!-- Comparison Cards Visual -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-gradient-to-br from-orange-950/40 to-slate-900 border border-orange-900/40 p-4 rounded-xl text-center">
+                        <div class="text-3xl mb-1" id="mc-icon-left">🌼</div>
+                        <h4 id="mc-name-left" class="font-bold text-sm text-amber-400">Cempasúchil</h4>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-950/40 to-slate-900 border border-purple-900/40 p-4 rounded-xl text-center">
+                        <div class="text-3xl mb-1" id="mc-icon-right">🎃</div>
+                        <h4 id="mc-name-right" class="font-bold text-sm text-purple-400">Pumpkin</h4>
+                    </div>
+                </div>
+
+                <!-- Sentence with blank -->
+                <div class="mb-6 bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+                    <p class="text-slate-300 text-sm sm:text-base font-medium">
+                        <span id="mc-sentence-start">The cempasúchil flower is</span>
+                        <span id="mc-blank" class="inline-block border-b-2 border-amber-400 font-bold text-amber-400 px-2 min-w-[100px] text-center">_______</span>
+                        <span id="mc-sentence-end">than a pumpkin.</span>
+                    </p>
+                    <p class="text-xs text-slate-400 mt-2">Adjetivo base: <span id="mc-base-adj" class="text-purple-300 font-bold">(colorful)</span></p>
+                </div>
+
+                <!-- Choice Buttons -->
+                <div id="mc-choices" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                    <!-- Choice buttons generated via JS -->
+                </div>
+
+                <!-- Feedback & Next -->
+                <div id="mc-feedback" class="hidden p-4 rounded-xl text-sm font-semibold mb-4"></div>
+                
+                <div class="flex justify-end">
+                    <button id="mc-next-btn" onclick="nextMatchQuestion()" class="hidden px-6 py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-sm transition shadow-lg flex items-center gap-2">
+                        <span>Siguiente Par</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- BADGES / ACHIEVEMENTS SECTION -->
+        <section class="mt-8 glass-panel p-4 rounded-2xl border border-slate-800">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-amber-400"></i> Insignias de Laboratorio Desbloqueadas
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div id="badge-1" class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex items-center gap-3 opacity-40 transition">
+                    <div class="w-9 h-9 rounded-lg bg-orange-950 border border-orange-700 flex items-center justify-center text-orange-400 text-lg">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-200">Sentence Builder</h4>
+                        <p class="text-[10px] text-slate-400">Completa Sec. 1</p>
+                    </div>
+                </div>
+                <div id="badge-2" class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex items-center gap-3 opacity-40 transition">
+                    <div class="w-9 h-9 rounded-lg bg-purple-950 border border-purple-700 flex items-center justify-center text-purple-400 text-lg">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-200">Grammar Master</h4>
+                        <p class="text-[10px] text-slate-400">Completa Sec. 2</p>
+                    </div>
+                </div>
+                <div id="badge-3" class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex items-center gap-3 opacity-40 transition">
+                    <div class="w-9 h-9 rounded-lg bg-pink-950 border border-pink-700 flex items-center justify-center text-pink-400 text-lg">
+                        <i class="fa-solid fa-earth-americas"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-200">Culture Explorer</h4>
+                        <p class="text-[10px] text-slate-400">Completa Sec. 3</p>
+                    </div>
+                </div>
+                <div id="badge-4" class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex items-center gap-3 opacity-40 transition">
+                    <div class="w-9 h-9 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400 text-lg">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-200">Lab Champion</h4>
+                        <p class="text-[10px] text-slate-400">Completa todo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-xs text-slate-500 py-4 px-4 border-t border-slate-900">
+        English Lab 2º Secundaria &bull; Material Educativo: Día de Muertos vs. Halloween
+    </footer>
+
+    <!-- CHEAT SHEET MODAL -->
+    <div id="cheat-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 shadow-2xl relative">
+            <button onclick="closeCheatSheet()" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-5 border-b border-slate-800 pb-3">
+                <i class="fa-solid fa-book-open text-cempasuchil text-2xl"></i>
+                <h2 class="text-lg font-bold text-slate-100">Guía Rápida: Comparativos y Superlativos</h2>
+            </div>
+
+            <div class="space-y-5 text-sm">
+                <!-- Comparative Section -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <h3 class="font-bold text-cempasuchil text-base mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced"></i> 1. Comparativos (Comparar 2 cosas)
+                    </h3>
+                    <p class="text-slate-300 text-xs mb-3">Se usan para decir que una cosa es "más... que" otra. Usa siempre <strong>THAN</strong> después del adjetivo.</p>
+                    
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="bg-slate-900 p-2 rounded border-l-2 border-cempasuchil">
+                            <strong>Adjetivos Cortos (1 sílaba):</strong> Agrega <strong>-er</strong>.<br>
+                            <em>Ejemplo:</em> Old &rarr; <strong>older than</strong><br>
+                            <span class="text-slate-400 italic">"Día de Muertos is older than Halloween."</span>
+                        </li>
+                        <li class="bg-slate-900 p-2 rounded border-l-2 border-cempasuchil">
+                            <strong>Adjetivos Largos (2+ sílabas):</strong> Agrega <strong>more</strong> antes del adjetivo.<br>
+                            <em>Ejemplo:</em> Delicious &rarr; <strong>more delicious than</strong><br>
+                            <span class="text-slate-400 italic">"Pan de muerto is more delicious than candy corn."</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Superlative Section -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <h3 class="font-bold text-purple-400 text-base mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-ranking-star"></i> 2. Superlativos (Destacar 1 sobre todos)
+                    </h3>
+                    <p class="text-slate-300 text-xs mb-3">Se usan para decir que algo es "el/la más...". Usa siempre <strong>THE</strong> antes del adjetivo.</p>
+                    
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="bg-slate-900 p-2 rounded border-l-2 border-purple-500">
+                            <strong>Adjetivos Cortos:</strong> Agrega <strong>the ... -est</strong>.<br>
+                            <em>Ejemplo:</em> Dark &rarr; <strong>the darkest</strong><br>
+                            <span class="text-slate-400 italic">"Halloween night is the darkest night."</span>
+                        </li>
+                        <li class="bg-slate-900 p-2 rounded border-l-2 border-purple-500">
+                            <strong>Adjetivos Largos:</strong> Agrega <strong>the most</strong>.<br>
+                            <em>Ejemplo:</em> Colorful &rarr; <strong>the most colorful</strong><br>
+                            <span class="text-slate-400 italic">"Día de Muertos is the most colorful tradition."</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Irregulars Section -->
+                <div class="bg-amber-950/30 p-4 rounded-xl border border-amber-800/50">
+                    <h3 class="font-bold text-amber-400 text-xs uppercase tracking-wider mb-2">
+                        ⚠️ Adjetivos Irregulares Importantes
+                    </h3>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="bg-slate-900 p-2 rounded">
+                            <span class="text-slate-400">Base</span><br><strong>Good</strong> (Bueno)
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded">
+                            <span class="text-slate-400">Comparativo</span><br><strong class="text-cempasuchil">Better than</strong>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded">
+                            <span class="text-slate-400">Superlativo</span><br><strong class="text-purple-400">The best</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeCheatSheet()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition">
+                    Entendido, ¡a practicar!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO SYNTHESIS & APPLICATION SCRIPT -->
+    <script>
+        /* --------------------------------------------------------
+           1. AUDIO SYNTHESIS (Web Audio API - No external files)
+        -------------------------------------------------------- */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Happy high chime
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'wrong') {
+                // Low buzz tone
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'badge') {
+                // Fanfare chord
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.4);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+        }
+
+        /* --------------------------------------------------------
+           2. GLOBAL GAME STATE
+        -------------------------------------------------------- */
+        let state = {
+            xp: 0,
+            level: 1,
+            completedModules: { 1: false, 2: false, 3: false },
+            sbIndex: 0,
+            qqIndex: 0,
+            mcIndex: 0
+        };
+
+        /* --------------------------------------------------------
+           3. DATA SETS
+        -------------------------------------------------------- */
+
+        // Data 1: Sentence Builder Data
+        const sbData = [
+            {
+                hint: '"El Día de Muertos es más antiguo que Halloween."',
+                words: ['Día de Muertos', 'is', 'older', 'than', 'Halloween.'],
+                correct: ['Día de Muertos', 'is', 'older', 'than', 'Halloween.']
+            },
+            {
+                hint: '"El pan de muerto es más delicioso que los dulces de maíz."',
+                words: ['Pan de muerto', 'is', 'more delicious', 'than', 'candy corn.'],
+                correct: ['Pan de muerto', 'is', 'more delicious', 'than', 'candy corn.']
+            },
+            {
+                hint: '"Halloween es más popular en los Estados Unidos."',
+                words: ['Halloween', 'is', 'more popular', 'in', 'the US.'],
+                correct: ['Halloween', 'is', 'more popular', 'in', 'the US.']
+            },
+            {
+                hint: '"El Día de Muertos es una de las tradiciones más coloridas."',
+                words: ['Día de Muertos', 'is', 'one of', 'the most colorful', 'traditions.'],
+                correct: ['Día de Muertos', 'is', 'one of', 'the most colorful', 'traditions.']
+            },
+            {
+                hint: '"Las ofrendas son más grandes que los altares simples."',
+                words: ['Ofrendas', 'are', 'bigger', 'than', 'simple altars.'],
+                correct: ['Ofrendas', 'are', 'bigger', 'than', 'simple altars.']
+            }
+        ];
+
+        // Data 2: Quick Quiz Data
+        const qqData = [
+            {
+                q: 'Elige la opción correcta: "Pan de muerto is ________ (delicious) than candy corn."',
+                options: ['deliciouser', 'more delicious', 'most delicious'],
+                answer: 1,
+                rule: '💡 Regla: "Delicious" tiene más de 2 sílabas, por lo que usamos "more" para el comparativo.'
+            },
+            {
+                q: '¿Cómo se dice "más antiguo que" en inglés?',
+                options: ['older than', 'more old than', 'oldest than'],
+                answer: 0,
+                rule: '💡 Regla: "Old" es un adjetivo corto (1 sílaba), por lo que añadimos la terminación -er.'
+            },
+            {
+                q: 'Completa con el superlativo: "Día de Muertos is ________ (colorful) tradition in Mexico."',
+                options: ['the colorfullest', 'the more colorful', 'the most colorful'],
+                answer: 2,
+                rule: '💡 Regla: Para superlativos con adjetivos largos, usamos "the most".'
+            },
+            {
+                q: 'Adjetivo irregular: "My altar looks ________ (good) than last year."',
+                options: ['gooder', 'better', 'more good'],
+                answer: 1,
+                rule: '💡 Regla: "Good" es irregular. Su comparativo no es "gooder", sino "better".'
+            },
+            {
+                q: '¿Cuál es la forma correcta para "el más aterrador"? (Scary)',
+                options: ['the scariest', 'the scaryest', 'the most scary'],
+                answer: 0,
+                rule: '💡 Regla: Para adjetivos cortos terminados en "y", cambia la "y" por "i" y agrega -est.'
+            }
+        ];
+
+        // Data 3: Culture Match & Compare Data
+        const mcData = [
+            {
+                leftName: 'Cempasúchil', leftIcon: '🌼',
+                rightName: 'Pumpkin', rightIcon: '🎃',
+                sentenceStart: 'The cempasúchil flower is',
+                sentenceEnd: 'than a pumpkin.',
+                baseAdj: 'colorful',
+                choices: ['more colorful', 'colorfuller', 'most colorful'],
+                answer: 0
+            },
+            {
+                leftName: 'Calaverita de Azúcar', leftIcon: '💀',
+                rightName: 'Chocolate Bar', rightIcon: '🍫',
+                sentenceStart: 'Sugar skulls are',
+                sentenceEnd: 'than regular chocolate bars.',
+                baseAdj: 'sweet',
+                choices: ['more sweet', 'sweeter', 'sweetest'],
+                answer: 1
+            },
+            {
+                leftName: 'Halloween Night', leftIcon: '🌙',
+                rightName: 'Day Altar', rightIcon: '🕯️',
+                sentenceStart: 'Halloween costumes are often',
+                sentenceEnd: 'than traditional catrina dresses.',
+                baseAdj: 'scary',
+                choices: ['scarier', 'more scary', 'scariest'],
+                answer: 0
+            },
+            {
+                leftName: 'Traditional Altar', leftIcon: '✨',
+                rightName: 'Plastic Decoration', rightIcon: '🎈',
+                sentenceStart: 'An altar is',
+                sentenceEnd: 'tradition of all during November.',
+                baseAdj: 'important',
+                choices: ['more important', 'importantest', 'the most important'],
+                answer: 2
+            },
+            {
+                leftName: 'Pan de Muerto', leftIcon: '🍞',
+                rightName: 'Commercial Candy', rightIcon: '🍬',
+                sentenceStart: 'Freshly baked Pan de muerto tastes',
+                sentenceEnd: 'than plain hard candy.',
+                baseAdj: 'good',
+                choices: ['gooder', 'better', 'best'],
+                answer: 1
+            }
+        ];
+
+        /* --------------------------------------------------------
+           4. MODULE SWITCHING LOGIC
+        -------------------------------------------------------- */
+        function switchModule(modNum) {
+            // Update tabs UI
+            document.querySelectorAll('.module-tab').forEach((tab, index) => {
+                if (index + 1 === modNum) {
+                    tab.classList.add('bg-slate-800', 'border-cempasuchil', 'text-white');
+                    tab.classList.remove('bg-slate-900', 'border-transparent', 'text-slate-400');
+                } else {
+                    tab.classList.remove('bg-slate-800', 'border-cempasuchil', 'text-white');
+                    tab.classList.add('bg-slate-900', 'border-transparent', 'text-slate-400');
+                }
+            });
+
+            // Update content views
+            document.querySelectorAll('.module-content').forEach((mod, index) => {
+                if (index + 1 === modNum) {
+                    mod.classList.remove('hidden');
+                    mod.classList.add('flex');
+                } else {
+                    mod.classList.add('hidden');
+                    mod.classList.remove('flex');
+                }
+            });
+        }
+
+        /* --------------------------------------------------------
+           5. GAMIFICATION & XP SYSTEM
+        -------------------------------------------------------- */
+        function addXP(amount) {
+            state.xp += amount;
+            document.getElementById('xp-counter').innerText = state.xp;
+            
+            // Level calculation
+            const newLevel = Math.floor(state.xp / 100) + 1;
+            if (newLevel > state.level) {
+                state.level = newLevel;
+                document.getElementById('level-txt').innerText = `Nivel ${state.level}`;
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.2 } });
+            }
+
+            // Update overall progress bar
+            const totalItems = sbData.length + qqData.length + mcData.length;
+            const completedItems = state.sbIndex + state.qqIndex + state.mcIndex;
+            const progressPercent = Math.min(100, Math.round((completedItems / totalItems) * 100));
+            document.getElementById('overall-progress').style.width = `${progressPercent}%`;
+
+            checkBadges();
+        }
+
+        function checkBadges() {
+            if (state.sbIndex >= sbData.length && !state.completedModules[1]) {
+                state.completedModules[1] = true;
+                unlockBadge('badge-1');
+            }
+            if (state.qqIndex >= qqData.length && !state.completedModules[2]) {
+                state.completedModules[2] = true;
+                unlockBadge('badge-2');
+            }
+            if (state.mcIndex >= mcData.length && !state.completedModules[3]) {
+                state.completedModules[3] = true;
+                unlockBadge('badge-3');
+            }
+            if (state.completedModules[1] && state.completedModules[2] && state.completedModules[3]) {
+                unlockBadge('badge-4');
+            }
+        }
+
+        function unlockBadge(badgeId) {
+            const el = document.getElementById(badgeId);
+            if (el && el.classList.contains('opacity-40')) {
+                el.classList.remove('opacity-40');
+                el.classList.add('glow-cempasuchil', 'border-amber-500');
+                playSound('badge');
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        /* --------------------------------------------------------
+           6. MODULE 1: SENTENCE BUILDER LOGIC
+        -------------------------------------------------------- */
+        let currentSbSelection = [];
+
+        function loadSentenceQuestion() {
+            if (state.sbIndex >= sbData.length) {
+                document.getElementById('module-1').innerHTML = `
+                    <div class="glass-panel p-8 rounded-2xl text-center border border-cempasuchil/40">
+                        <div class="text-4xl mb-3">🎉</div>
+                        <h3 class="text-xl font-bold text-amber-400 mb-2">¡Sección de Oraciones Completada!</h3>
+                        <p class="text-sm text-slate-300 mb-4">Has demostrado gran dominio reconociendo la estructura comparativa y superlativa.</p>
+                        <button onclick="switchModule(2)" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-sm transition">
+                            Ir a la Sección 2: Quick Quiz &rarr;
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = sbData[state.sbIndex];
+            document.getElementById('sb-count').innerText = `${state.sbIndex + 1}/${sbData.length}`;
+            document.getElementById('sb-hint').innerText = data.hint;
+            
+            // Clear current zones
+            currentSbSelection = [];
+            renderSbZones();
+
+            // Hide feedback
+            const fb = document.getElementById('sb-feedback');
+            fb.classList.add('hidden');
+
+            // Shuffle words for bank
+            const shuffled = [...data.words].sort(() => Math.random() - 0.5);
+            const bank = document.getElementById('sb-word-bank');
+            bank.innerHTML = '';
+
+            shuffled.forEach((word) => {
+                const btn = document.createElement('button');
+                btn.className = 'word-chip bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm flex items-center gap-1.5';
+                btn.innerText = word;
+                btn.onclick = () => selectWord(word, btn);
+                bank.appendChild(btn);
+            });
+        }
+
+        function selectWord(word, btnElement) {
+            currentSbSelection.push(word);
+            btnElement.disabled = true;
+            btnElement.classList.add('opacity-30', 'pointer-events-none');
+            renderSbZones();
+        }
+
+        function renderSbZones() {
+            const answerZone = document.getElementById('sb-answer-zone');
+            answerZone.innerHTML = '';
+
+            if (currentSbSelection.length === 0) {
+                answerZone.innerHTML = `<span class="text-slate-600 text-sm italic pointer-events-none">Toca las palabras de abajo en orden...</span>`;
+                return;
+            }
+
+            currentSbSelection.forEach((word, index) => {
+                const chip = document.createElement('span');
+                chip.className = 'bg-cempasuchilDark text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm cursor-pointer hover:bg-red-700 transition';
+                chip.innerHTML = `${word} <i class="fa-solid fa-xmark text-xs opacity-70"></i>`;
+                chip.onclick = () => removeWordAt(index);
+                answerZone.appendChild(chip);
+            });
+        }
+
+        function removeWordAt(index) {
+            const removedWord = currentSbSelection.splice(index, 1)[0];
+            renderSbZones();
+
+            // Re-enable in word bank
+            const bankBtns = document.getElementById('sb-word-bank').querySelectorAll('button');
+            for (let btn of bankBtns) {
+                if (btn.innerText === removedWord && btn.disabled) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-30', 'pointer-events-none');
+                    break;
+                }
+            }
+        }
+
+        function resetCurrentSentence() {
+            currentSbSelection = [];
+            loadSentenceQuestion();
+        }
+
+        function checkSentence() {
+            const data = sbData[state.sbIndex];
+            const isCorrect = JSON.stringify(currentSbSelection) === JSON.stringify(data.correct);
+            const fb = document.getElementById('sb-feedback');
+
+            fb.classList.remove('hidden', 'bg-green-950/80', 'border-green-800', 'text-green-200', 'bg-red-950/80', 'border-red-800', 'text-red-200');
+
+            if (isCorrect) {
+                playSound('correct');
+                addXP(20);
+                fb.classList.add('bg-green-950/80', 'border', 'border-green-800', 'text-green-200');
+                fb.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 text-xl"></i> <div><strong>¡Excelente! Oración correcta.</strong> (+20 XP)</div>`;
+                
+                setTimeout(() => {
+                    state.sbIndex++;
+                    loadSentenceQuestion();
+                }, 1400);
+            } else {
+                playSound('wrong');
+                fb.classList.add('bg-red-950/80', 'border', 'border-red-800', 'text-red-200');
+                fb.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400 text-xl"></i> <div><strong>Casi... Revisa el orden.</strong> Recuerda poner el sujeto primero, luego el verbo y la comparación.</div>`;
+            }
+        }
+
+        /* --------------------------------------------------------
+           7. MODULE 2: QUICK QUIZ LOGIC
+        -------------------------------------------------------- */
+        function loadQuizQuestion() {
+            if (state.qqIndex >= qqData.length) {
+                document.getElementById('module-2').innerHTML = `
+                    <div class="glass-panel p-8 rounded-2xl text-center border border-purple-500/40">
+                        <div class="text-4xl mb-3">⚡</div>
+                        <h3 class="text-xl font-bold text-purple-300 mb-2">¡Duelo de Reglas Completado!</h3>
+                        <p class="text-sm text-slate-300 mb-4">¡Has dominado los conceptos clave de comparativos y superlativos!</p>
+                        <button onclick="switchModule(3)" class="px-6 py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-sm transition">
+                            Ir a la Sección 3: Match & Compare &rarr;
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = qqData[state.qqIndex];
+            document.getElementById('qq-count').innerText = `${state.qqIndex + 1}/${qqData.length}`;
+            document.getElementById('qq-question').innerText = data.q;
+
+            const optsContainer = document.getElementById('qq-options');
+            optsContainer.innerHTML = '';
+
+            const expBox = document.getElementById('qq-explanation');
+            expBox.classList.add('hidden');
+
+            const nextBtn = document.getElementById('qq-next-btn');
+            nextBtn.classList.add('hidden');
+
+            data.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'qq-opt-btn bg-slate-800 hover:bg-slate-700 text-slate-100 p-4 rounded-xl font-semibold text-sm border border-slate-700 transition text-left flex items-center justify-between';
+                btn.innerHTML = `<span>${optText}</span> <i class="fa-regular fa-circle text-slate-500"></i>`;
+                btn.onclick = () => answerQuiz(i);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function answerQuiz(selectedIndex) {
+            const data = qqData[state.qqIndex];
+            const buttons = document.querySelectorAll('.qq-opt-btn');
+            
+            // Disable all buttons
+            buttons.forEach(b => b.classList.add('pointer-events-none'));
+
+            const expBox = document.getElementById('qq-explanation');
+            expBox.innerText = data.rule;
+            expBox.classList.remove('hidden');
+
+            if (selectedIndex === data.answer) {
+                playSound('correct');
+                addXP(20);
+                buttons[selectedIndex].classList.remove('bg-slate-800', 'border-slate-700');
+                buttons[selectedIndex].classList.add('bg-green-950', 'border-2', 'border-green-500', 'text-green-200');
+                buttons[selectedIndex].querySelector('i').className = 'fa-solid fa-circle-check text-green-400';
+            } else {
+                playSound('wrong');
+                buttons[selectedIndex].classList.remove('bg-slate-800', 'border-slate-700');
+                buttons[selectedIndex].classList.add('bg-red-950', 'border-2', 'border-red-500', 'text-red-200');
+                buttons[selectedIndex].querySelector('i').className = 'fa-solid fa-circle-xmark text-red-400';
+
+                // Highlight correct one
+                buttons[data.answer].classList.remove('bg-slate-800', 'border-slate-700');
+                buttons[data.answer].classList.add('bg-green-950/60', 'border', 'border-green-600', 'text-green-300');
+            }
+
+            document.getElementById('qq-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            state.qqIndex++;
+            loadQuizQuestion();
+        }
+
+        /* --------------------------------------------------------
+           8. MODULE 3: CULTURE MATCH LOGIC
+        -------------------------------------------------------- */
+        function loadMatchQuestion() {
+            if (state.mcIndex >= mcData.length) {
+                document.getElementById('module-3').innerHTML = `
+                    <div class="glass-panel p-8 rounded-2xl text-center border border-pink-500/40">
+                        <div class="text-4xl mb-3">🎭</div>
+                        <h3 class="text-xl font-bold text-pink-300 mb-2">¡Sección Cultural Completada!</h3>
+                        <p class="text-sm text-slate-300 mb-4">Has explorado y comparado con éxito los elementos clave de Día de Muertos y Halloween.</p>
+                        <button onclick="openCheatSheet()" class="px-6 py-2.5 bg-cempasuchil text-slate-950 font-bold rounded-xl text-sm transition">
+                            Revisar Guía Rápida
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = mcData[state.mcIndex];
+            document.getElementById('mc-count').innerText = `${state.mcIndex + 1}/${mcData.length}`;
+            
+            // Icons and Names
+            document.getElementById('mc-icon-left').innerText = data.leftIcon;
+            document.getElementById('mc-name-left').innerText = data.leftName;
+            document.getElementById('mc-icon-right').innerText = data.rightIcon;
+            document.getElementById('mc-name-right').innerText = data.rightName;
+
+            // Sentence
+            document.getElementById('mc-sentence-start').innerText = data.sentenceStart;
+            document.getElementById('mc-blank').innerText = '_______';
+            document.getElementById('mc-sentence-end').innerText = data.sentenceEnd;
+            document.getElementById('mc-base-adj').innerText = `(${data.baseAdj})`;
+
+            // Options
+            const choicesContainer = document.getElementById('mc-choices');
+            choicesContainer.innerHTML = '';
+
+            const fb = document.getElementById('mc-feedback');
+            fb.classList.add('hidden');
+
+            document.getElementById('mc-next-btn').classList.add('hidden');
+
+            data.choices.forEach((choiceText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'mc-choice-btn bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 px-4 rounded-xl font-semibold text-sm border border-slate-700 transition';
+                btn.innerText = choiceText;
+                btn.onclick = () => answerMatch(index);
+                choicesContainer.appendChild(btn);
+            });
+        }
+
+        function answerMatch(selectedIndex) {
+            const data = mcData[state.mcIndex];
+            const buttons = document.querySelectorAll('.mc-choice-btn');
+            
+            buttons.forEach(b => b.classList.add('pointer-events-none'));
+
+            document.getElementById('mc-blank').innerText = data.choices[selectedIndex];
+
+            const fb = document.getElementById('mc-feedback');
+            fb.classList.remove('hidden', 'bg-green-950/80', 'border-green-800', 'text-green-200', 'bg-red-950/80', 'border-red-800', 'text-red-200');
+
+            if (selectedIndex === data.answer) {
+                playSound('correct');
+                addXP(20);
+                buttons[selectedIndex].classList.add('bg-green-600', 'text-white', 'border-green-500');
+                fb.classList.add('bg-green-950/80', 'border', 'border-green-800', 'text-green-200');
+                fb.innerHTML = `<i class="fa-solid fa-circle-check text-green-400"></i> ¡Excelente elección gramatical!`;
+            } else {
+                playSound('wrong');
+                buttons[selectedIndex].classList.add('bg-red-600', 'text-white', 'border-red-500');
+                buttons[data.answer].classList.add('bg-green-950/80', 'border', 'border-green-600', 'text-green-300');
+                fb.classList.add('bg-red-950/80', 'border', 'border-red-800', 'text-red-200');
+                fb.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400"></i> Respuesta correcta: <strong>${data.choices[data.answer]}</strong>`;
+            }
+
+            document.getElementById('mc-next-btn').classList.remove('hidden');
+        }
+
+        function nextMatchQuestion() {
+            state.mcIndex++;
+            loadMatchQuestion();
+        }
+
+        /* --------------------------------------------------------
+           9. MODAL HANDLERS
+        -------------------------------------------------------- */
+        function openCheatSheet() {
+            document.getElementById('cheat-modal').classList.remove('hidden');
+        }
+
+        function closeCheatSheet() {
+            document.getElementById('cheat-modal').classList.add('hidden');
+        }
+
+        /* --------------------------------------------------------
+           10. INITIALIZATION
+        -------------------------------------------------------- */
+        window.onload = function() {
+            loadSentenceQuestion();
+            loadQuizQuestion();
+            loadMatchQuestion();
+        };
+    </script>
+</body>
+</html>
